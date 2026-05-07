@@ -3,820 +3,2168 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>台股風險折線圖對照｜三大法人期現貨量化分析</title>
+  <title>台股期現貨風險量化儀表板 V3</title>
+
   <style>
     :root {
-      --bg: #0b1220;
-      --panel: #111a2b;
-      --panel-2: #0f1726;
-      --panel-3: #172238;
-      --line: #263754;
-      --line-2: #38506f;
-      --text: #e7edf7;
-      --muted: #95a3b8;
-      --muted-2: #6f7f95;
+      --bg: #0b1020;
+      --panel: #111827;
+      --panel-2: #162033;
+      --panel-3: #0f172a;
+      --border: #26354f;
+      --border-soft: #334155;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --muted-2: #64748b;
       --red: #ef4444;
-      --red-soft: rgba(239, 68, 68, .12);
       --green: #22c55e;
-      --green-soft: rgba(34, 197, 94, .13);
       --yellow: #facc15;
-      --yellow-soft: rgba(250, 204, 21, .13);
-      --blue: #38bdf8;
-      --blue-soft: rgba(56, 189, 248, .12);
-      --cyan: #2dd4bf;
+      --blue: #60a5fa;
+      --cyan: #22d3ee;
       --orange: #fb923c;
-      --shadow: 0 20px 70px rgba(0,0,0,.28);
-      --radius: 18px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+      --white: #ffffff;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      --radius: 14px;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       background:
-        radial-gradient(circle at 15% -10%, rgba(56,189,248,.12), transparent 32%),
-        radial-gradient(circle at 92% 0%, rgba(250,204,21,.08), transparent 28%),
-        linear-gradient(180deg, #08101d 0%, var(--bg) 36%, #070d17 100%);
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 32%),
+        radial-gradient(circle at top right, rgba(34, 211, 238, 0.10), transparent 28%),
+        var(--bg);
       color: var(--text);
-      font-family: var(--sans);
-      letter-spacing: .01em;
+      font-family: var(--font);
+      line-height: 1.55;
     }
 
-    .page {
-      width: min(1560px, calc(100vw - 36px));
+    .app {
+      max-width: 1520px;
       margin: 0 auto;
-      padding: 28px 0 46px;
+      padding: 28px 28px 48px;
     }
 
     .topbar {
       display: flex;
-      align-items: flex-start;
       justify-content: space-between;
-      gap: 28px;
-      padding: 20px 24px;
-      border: 1px solid rgba(148,163,184,.22);
-      border-radius: 22px;
-      background: rgba(15,23,38,.78);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(14px);
+      gap: 24px;
+      align-items: flex-start;
+      margin-bottom: 20px;
     }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--blue);
-      font-weight: 700;
-      font-size: 14px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
+    .title-block h1 {
+      margin: 0;
+      font-size: 34px;
+      letter-spacing: 0.03em;
+      line-height: 1.2;
     }
 
-    h1 {
-      margin: 8px 0 8px;
-      font-size: clamp(34px, 4vw, 58px);
-      line-height: 1.05;
-      letter-spacing: -.04em;
+    .title-block h1 span {
+      color: var(--yellow);
     }
 
     .subtitle {
-      margin: 0;
       color: var(--muted);
-      font-size: 17px;
-      line-height: 1.75;
-      max-width: 980px;
+      font-size: 15px;
+      margin-top: 8px;
     }
 
-    .status-pill {
-      flex: 0 0 auto;
-      min-width: 270px;
-      padding: 18px 20px;
-      border-radius: 18px;
-      border: 1px solid rgba(250,204,21,.38);
-      background: linear-gradient(180deg, rgba(250,204,21,.12), rgba(250,204,21,.04));
-    }
-    .status-pill .label { color: var(--muted); font-size: 14px; }
-    .status-pill .value { color: var(--yellow); font-weight: 900; font-size: 30px; margin-top: 6px; }
-    .status-pill .note { color: var(--text); margin-top: 8px; font-size: 14px; line-height: 1.5; }
-
-    .nav {
+    .badge-row {
       display: flex;
+      gap: 8px;
       flex-wrap: wrap;
-      gap: 10px;
-      margin: 18px 0 22px;
+      margin-top: 14px;
     }
-    .nav a {
-      text-decoration: none;
-      color: var(--muted);
-      border: 1px solid rgba(148,163,184,.22);
+
+    .badge {
+      border: 1px solid var(--border-soft);
+      background: rgba(15, 23, 42, 0.78);
+      padding: 7px 11px;
       border-radius: 999px;
-      padding: 9px 14px;
-      background: rgba(15,23,38,.55);
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-width: 340px;
+    }
+
+    button,
+    .file-label {
+      appearance: none;
+      border: 1px solid var(--border-soft);
+      background: #172033;
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-weight: 650;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.15s ease;
+      box-shadow: none;
+    }
+
+    button:hover,
+    .file-label:hover {
+      border-color: var(--blue);
+      background: #1d2b45;
+    }
+
+    button.primary {
+      background: #1d4ed8;
+      border-color: #3b82f6;
+    }
+
+    button.danger {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.55);
+      color: #fecaca;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .notice {
+      border: 1px solid rgba(250, 204, 21, 0.35);
+      background: rgba(250, 204, 21, 0.08);
+      color: #fde68a;
+      padding: 12px 14px;
+      border-radius: var(--radius);
+      margin-bottom: 18px;
       font-size: 14px;
     }
-    .nav a:hover { color: var(--text); border-color: rgba(56,189,248,.45); }
-
-    .alert {
-      display: grid;
-      grid-template-columns: 1fr auto auto auto;
-      gap: 12px;
-      align-items: center;
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid rgba(148,163,184,.18);
-      background: rgba(15,23,38,.72);
-      margin-bottom: 20px;
-    }
-    .alert-main {
-      padding: 14px 18px;
-      border-radius: 14px;
-      border: 1px solid rgba(250,204,21,.28);
-      background: rgba(250,204,21,.07);
-      color: var(--text);
-      font-weight: 800;
-      line-height: 1.55;
-      font-size: 17px;
-    }
-    .alert-main b { color: var(--yellow); }
-    .chip {
-      min-width: 170px;
-      padding: 13px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(148,163,184,.22);
-      background: rgba(2,6,23,.32);
-    }
-    .chip .name { color: var(--muted); font-size: 12px; }
-    .chip .num { font-size: 21px; font-weight: 900; margin-top: 4px; }
-    .chip.blue .num { color: var(--blue); }
-    .chip.red .num { color: var(--red); }
-    .chip.yellow .num { color: var(--yellow); }
 
     .grid {
       display: grid;
-      grid-template-columns: 1.34fr .86fr;
-      gap: 20px;
+      gap: 16px;
+    }
+
+    .grid-4 {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .grid-3 {
+      grid-template-columns: 1.2fr 1fr 1fr;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .panel {
-      border: 1px solid rgba(148,163,184,.18);
-      background: linear-gradient(180deg, rgba(17,26,43,.92), rgba(12,18,31,.92));
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.96), rgba(15, 23, 42, 0.96));
+      border: 1px solid var(--border);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow: hidden;
     }
-    .panel-header {
-      padding: 17px 20px;
-      border-bottom: 1px solid rgba(148,163,184,.14);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-    .panel-title {
-      margin: 0;
-      font-size: 21px;
-      letter-spacing: -.02em;
-    }
-    .panel-kicker {
-      color: var(--muted);
-      font-size: 13px;
-      white-space: nowrap;
-    }
-    .panel-body { padding: 18px 20px 20px; }
 
-    .charts-2x2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+    .panel.pad {
+      padding: 16px;
     }
-    .chart-card {
-      border: 1px solid rgba(148,163,184,.17);
-      border-radius: 16px;
-      background: rgba(2,6,23,.18);
-      padding: 14px 14px 12px;
-      min-height: 310px;
-      position: relative;
-    }
-    .chart-title {
+
+    .panel-header {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 8px;
-      font-weight: 850;
+      gap: 12px;
+      background: rgba(30, 41, 59, 0.55);
+    }
+
+    .panel-title {
+      font-weight: 800;
+      letter-spacing: 0.03em;
       font-size: 16px;
     }
-    .chart-title small { color: var(--muted); font-weight: 600; font-size: 12px; }
-    svg { width: 100%; height: auto; display: block; }
-    .axis { stroke: rgba(148,163,184,.44); stroke-width: 1; }
-    .gridline { stroke: rgba(148,163,184,.13); stroke-width: 1; stroke-dasharray: 4 5; }
-    .ticktext { fill: var(--muted); font-size: 11px; font-family: var(--mono); }
-    .labeltext { fill: var(--text); font-size: 12px; font-weight: 800; font-family: var(--sans); }
-    .value-label { font-size: 13px; font-weight: 900; font-family: var(--mono); }
-    .zero-line { stroke: rgba(231,237,247,.55); stroke-width: 1.2; stroke-dasharray: 6 5; }
-    .line-yellow { fill: none; stroke: var(--yellow); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .line-red { fill: none; stroke: var(--red); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .line-green { fill: none; stroke: var(--green); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .line-cyan { fill: none; stroke: var(--cyan); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .line-blue { fill: none; stroke: var(--blue); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
-    .marker { stroke: #0b1220; stroke-width: 3; }
-    .legend { display: flex; gap: 12px; align-items: center; color: var(--muted); font-size: 12px; margin-top: -2px; flex-wrap: wrap; }
-    .legend span::before { content: ""; display: inline-block; width: 18px; height: 3px; border-radius: 999px; margin-right: 6px; vertical-align: middle; }
-    .legend .cyan::before { background: var(--cyan); }
-    .legend .yellow::before { background: var(--yellow); }
 
-    .snapshot-grid {
+    .panel-note {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .controls {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr 1fr auto auto;
+      gap: 10px;
+      align-items: end;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border-soft);
+      background: #0f172a;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-family: var(--font);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--blue);
+    }
+
+    .kpi {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+      min-height: 112px;
+    }
+
+    .kpi .label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .kpi .value {
+      font-size: 25px;
+      font-weight: 850;
+      letter-spacing: 0.01em;
+    }
+
+    .kpi .sub {
+      color: var(--muted-2);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .value.red,
+    .red {
+      color: var(--red);
+    }
+
+    .value.green,
+    .green {
+      color: var(--green);
+    }
+
+    .value.yellow,
+    .yellow {
+      color: var(--yellow);
+    }
+
+    .value.blue,
+    .blue {
+      color: var(--blue);
+    }
+
+    .value.cyan,
+    .cyan {
+      color: var(--cyan);
+    }
+
+    .chart {
+      width: 100%;
+      height: 310px;
+      display: block;
+      background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.35));
+    }
+
+    .chart.small {
+      height: 250px;
+    }
+
+    .chart-wrap {
+      padding: 10px 10px 0;
+    }
+
+    .chart-legend {
+      display: flex;
+      flex-wrap: wrap;
       gap: 12px;
+      padding: 0 14px 12px;
+      color: var(--muted);
+      font-size: 12px;
     }
-    .metric {
-      border: 1px solid rgba(148,163,184,.16);
-      background: rgba(2,6,23,.23);
-      border-radius: 15px;
-      padding: 15px;
-      min-height: 98px;
-    }
-    .metric .name { color: var(--muted); font-size: 13px; line-height: 1.35; }
-    .metric .value { font-size: 26px; font-weight: 950; margin-top: 7px; letter-spacing: -.02em; }
-    .metric .unit { font-size: 14px; font-weight: 700; color: var(--muted); margin-left: 3px; }
-    .positive { color: var(--red); }
-    .negative { color: var(--green); }
-    .warning { color: var(--yellow); }
-    .neutral { color: var(--text); }
-    .info { color: var(--blue); }
 
-    .section-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-top: 20px;
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
     }
-    .compare-table {
+
+    .legend-line {
+      width: 22px;
+      height: 3px;
+      border-radius: 99px;
+      display: inline-block;
+    }
+
+    .table-wrap {
+      overflow: auto;
+    }
+
+    table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 14px;
-      overflow: hidden;
-      border-radius: 14px;
+      font-size: 13px;
     }
-    .compare-table th, .compare-table td {
-      padding: 12px 10px;
-      border-bottom: 1px solid rgba(148,163,184,.13);
-      border-right: 1px solid rgba(148,163,184,.10);
+
+    th,
+    td {
+      border-bottom: 1px solid rgba(51, 65, 85, 0.68);
+      padding: 9px 10px;
+      white-space: nowrap;
       text-align: right;
     }
-    .compare-table th:first-child, .compare-table td:first-child { text-align: left; color: var(--muted); }
-    .compare-table th {
-      color: var(--text);
-      font-weight: 850;
-      background: rgba(56,189,248,.07);
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
     }
-    .compare-table tr:last-child td { border-bottom: none; }
-    .compare-table .current { background: rgba(250,204,21,.06); }
-    .compare-table .tag {
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #1e293b;
+      color: #cbd5e1;
+      font-weight: 750;
+    }
+
+    tr:hover td {
+      background: rgba(30, 41, 59, 0.42);
+    }
+
+    td[contenteditable="true"] {
+      outline: none;
+      cursor: text;
+    }
+
+    td[contenteditable="true"]:focus {
+      background: rgba(96, 165, 250, 0.12);
+      box-shadow: inset 0 0 0 1px var(--blue);
+    }
+
+    .pill {
       display: inline-flex;
+      align-items: center;
+      justify-content: center;
       padding: 4px 8px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 800;
-      border: 1px solid rgba(148,163,184,.2);
-      color: var(--text);
+      border: 1px solid var(--border-soft);
     }
 
-    .mini-table {
-      width: 100%;
-      border-collapse: collapse;
+    .pill.red {
+      background: rgba(239, 68, 68, 0.12);
+      color: #fecaca;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .pill.green {
+      background: rgba(34, 197, 94, 0.12);
+      color: #bbf7d0;
+      border-color: rgba(34, 197, 94, 0.38);
+    }
+
+    .pill.yellow {
+      background: rgba(250, 204, 21, 0.12);
+      color: #fef3c7;
+      border-color: rgba(250, 204, 21, 0.42);
+    }
+
+    .summary-box {
+      display: grid;
+      gap: 12px;
+    }
+
+    .big-conclusion {
+      border: 1px solid rgba(250, 204, 21, 0.45);
+      background: rgba(250, 204, 21, 0.08);
+      padding: 15px;
+      border-radius: 13px;
+    }
+
+    .big-conclusion .head {
+      color: var(--yellow);
+      font-size: 15px;
+      font-weight: 850;
+      margin-bottom: 8px;
+    }
+
+    .big-conclusion .body {
+      font-size: 18px;
+      font-weight: 750;
+    }
+
+    .factor-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .factor {
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.75);
+      padding: 11px 12px;
+      border-radius: 12px;
+    }
+
+    .factor .name {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
       font-size: 13px;
     }
-    .mini-table th, .mini-table td {
-      border-bottom: 1px solid rgba(148,163,184,.13);
-      padding: 9px 8px;
-      text-align: right;
-    }
-    .mini-table th:first-child, .mini-table td:first-child { text-align: left; color: var(--muted); }
-    .mini-table th { color: var(--text); background: rgba(56,189,248,.06); font-weight: 800; }
-    .mini-table tr:last-child td { border-bottom: none; }
 
-    .judgement {
+    .bar {
+      margin-top: 8px;
+      height: 8px;
+      background: #0b1220;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, var(--green), var(--yellow), var(--red));
+    }
+
+    .model {
+      display: grid;
+      gap: 10px;
+    }
+
+    .formula {
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.7);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .formula .eq {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      color: #f8fafc;
+      font-weight: 800;
+      font-size: 15px;
+    }
+
+    .formula .desc {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 5px;
+    }
+
+    .split {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
     }
-    .judge-card {
-      border-radius: 16px;
-      padding: 16px;
-      border: 1px solid rgba(148,163,184,.18);
-      background: rgba(2,6,23,.19);
-    }
-    .judge-card.green { border-color: rgba(34,197,94,.32); background: var(--green-soft); }
-    .judge-card.red { border-color: rgba(239,68,68,.32); background: var(--red-soft); }
-    .judge-card h3 { margin: 0 0 10px; font-size: 18px; }
-    .judge-card.green h3 { color: var(--green); }
-    .judge-card.red h3 { color: var(--red); }
-    .judge-card ul { margin: 0; padding-left: 20px; color: var(--text); line-height: 1.9; }
-    .conclusion-box {
-      margin-top: 14px;
-      border-radius: 12px;
-      padding: 12px;
-      font-weight: 900;
-      text-align: center;
-    }
-    .green .conclusion-box { background: rgba(34,197,94,.14); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
-    .red .conclusion-box { background: rgba(239,68,68,.14); color: var(--red); border: 1px solid rgba(239,68,68,.3); }
 
-    .model-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-    .model-card {
-      border: 1px solid rgba(148,163,184,.17);
+    .state-card {
       border-radius: 14px;
       padding: 14px;
-      background: rgba(2,6,23,.20);
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.7);
     }
-    .model-card .formula { font-family: var(--mono); color: var(--text); font-weight: 900; font-size: 17px; margin: 6px 0 8px; }
-    .model-card .desc { color: var(--muted); font-size: 13px; line-height: 1.6; }
-    .model-card .result { margin-top: 10px; font-size: 22px; font-weight: 950; }
 
-    .risk-area {
-      display: grid;
-      grid-template-columns: .9fr 1.1fr;
-      gap: 18px;
-      align-items: stretch;
+    .state-card h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
     }
-    .gauge-wrap {
-      border: 1px solid rgba(148,163,184,.17);
-      border-radius: 16px;
-      background: rgba(2,6,23,.22);
-      padding: 18px;
-      text-align: center;
-    }
-    .gauge-label { font-size: 34px; color: var(--yellow); font-weight: 950; margin-top: -6px; }
-    .gauge-sub { color: var(--muted); font-size: 15px; }
-    .checklist {
-      border: 1px solid rgba(148,163,184,.17);
-      border-radius: 16px;
-      background: rgba(2,6,23,.22);
-      padding: 18px;
-    }
-    .checklist h3 { margin: 0 0 12px; font-size: 18px; }
-    .checklist ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 11px; }
-    .checklist li { display: grid; grid-template-columns: 24px 1fr; gap: 9px; color: var(--text); line-height: 1.55; }
-    .boxmark {
-      width: 22px; height: 22px; border-radius: 6px;
-      border: 1px solid rgba(56,189,248,.75);
-      display: inline-grid; place-items: center; color: var(--blue); font-weight: 900; margin-top: 1px;
-      background: rgba(56,189,248,.08);
-    }
-    .em { color: var(--yellow); font-weight: 950; }
 
-    .logic-chain {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 14px;
+    .state-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 14px;
     }
-    .logic-step {
-      border: 1px solid rgba(56,189,248,.26);
-      border-radius: 14px;
-      padding: 13px;
-      background: rgba(56,189,248,.06);
-      color: var(--text);
-      position: relative;
-      min-height: 82px;
+
+    .state-card li {
+      margin: 7px 0;
     }
-    .logic-step:not(:last-child)::after {
-      content: "→";
-      position: absolute;
-      right: -18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--blue);
-      font-size: 24px;
-      font-weight: 900;
-      z-index: 1;
+
+    .state-card.good {
+      border-color: rgba(34, 197, 94, 0.45);
     }
-    .logic-step b { display: block; color: var(--blue); margin-bottom: 5px; }
-    .logic-step span { color: var(--muted); font-size: 13px; line-height: 1.5; }
+
+    .state-card.bad {
+      border-color: rgba(239, 68, 68, 0.45);
+    }
 
     .footer {
-      margin-top: 22px;
-      padding: 15px 18px;
-      color: var(--muted);
-      border: 1px solid rgba(148,163,184,.16);
-      border-radius: 18px;
-      background: rgba(15,23,38,.65);
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .tooltip {
-      position: fixed;
-      z-index: 50;
-      pointer-events: none;
-      transform: translate(-50%, calc(-100% - 12px));
-      background: rgba(2,6,23,.96);
-      border: 1px solid rgba(148,163,184,.25);
-      border-radius: 12px;
-      padding: 9px 11px;
-      color: var(--text);
+      color: var(--muted-2);
       font-size: 12px;
-      box-shadow: 0 14px 38px rgba(0,0,0,.35);
-      display: none;
-      white-space: nowrap;
+      padding: 18px 4px 0;
+      text-align: center;
     }
 
-    @media (max-width: 1180px) {
-      .grid, .section-grid { grid-template-columns: 1fr; }
-      .alert { grid-template-columns: 1fr 1fr; }
-      .alert-main { grid-column: 1 / -1; }
-      .topbar { flex-direction: column; }
-      .status-pill { width: 100%; }
-      .model-grid { grid-template-columns: 1fr 1fr; }
+    .empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 28px;
     }
-    @media (max-width: 760px) {
-      .page { width: min(100vw - 22px, 1560px); padding-top: 14px; }
-      .charts-2x2, .snapshot-grid, .judgement, .model-grid, .risk-area, .logic-chain, .alert { grid-template-columns: 1fr; }
-      .logic-step::after { display: none; }
-      h1 { font-size: 36px; }
-      .panel-header { flex-direction: column; align-items: flex-start; }
-      .panel-kicker { white-space: normal; }
+
+    .textarea-import {
+      min-height: 150px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.72);
+      z-index: 100;
+      padding: 30px;
+      overflow: auto;
+    }
+
+    .modal-backdrop.active {
+      display: block;
+    }
+
+    .modal {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .modal .modal-body {
+      padding: 16px;
+    }
+
+    .help-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .code {
+      background: #020617;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      overflow: auto;
+      color: #cbd5e1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1100px) {
+      .topbar,
+      .grid-3,
+      .grid-2,
+      .split,
+      .help-grid {
+        grid-template-columns: 1fr;
+        display: grid;
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .controls {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .header-actions {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .app {
+        padding: 18px;
+      }
+
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .title-block h1 {
+        font-size: 26px;
+      }
+
+      .chart {
+        height: 280px;
+      }
     }
 
     @media print {
-      body { background: #fff; color: #111; }
-      .page { width: 100%; padding: 0; }
-      .nav { display: none; }
-      .panel, .topbar, .alert, .footer { box-shadow: none; }
+      body {
+        background: white;
+        color: black;
+      }
+
+      .header-actions,
+      .controls,
+      .notice,
+      .footer,
+      .modal-backdrop {
+        display: none !important;
+      }
+
+      .panel {
+        box-shadow: none;
+        break-inside: avoid;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="tooltip" id="tooltip"></div>
-  <main class="page">
+  <div class="app">
     <header class="topbar">
-      <div>
-        <div class="eyebrow">Institutional Risk Dashboard · TAIEX</div>
-        <h1>現今數據 vs 歷史大跌：台股風險折線圖對照</h1>
-        <p class="subtitle">以 2026/05/07 三大法人期現貨部位為核心，對照 2024/08/05 與 2026/03/04。此頁面聚焦「折線圖、期現結構、風險觸發條件」，避免只用單一空單口數做結論。</p>
+      <div class="title-block">
+        <h1>台股期現貨風險量化儀表板 <span>V3 Dynamic</span></h1>
+        <div class="subtitle">
+          以「現貨買賣超 × 台指期未平倉 × 空單密度 × 歷史大跌對照」建立機構式風險判讀。
+        </div>
+        <div class="badge-row">
+          <div class="badge">資料型態：<strong>上市現貨 / 期貨 / 選擇權可擴充</strong></div>
+          <div class="badge">圖表：<strong>SVG 動態折線圖</strong></div>
+          <div class="badge">匯入：<strong>CSV / JSON</strong></div>
+          <div class="badge">儲存：<strong>localStorage</strong></div>
+        </div>
       </div>
-      <aside class="status-pill">
-        <div class="label">當前風險等級</div>
-        <div class="value">中高風險</div>
-        <div class="note">現貨仍強，但期貨避險部位偏重；風險正在累積，尚未等同崩盤啟動。</div>
-      </aside>
+
+      <div class="header-actions">
+        <label class="file-label">
+          匯入 CSV
+          <input id="csvFile" type="file" accept=".csv,text/csv" />
+        </label>
+        <label class="file-label">
+          匯入 JSON
+          <input id="jsonFile" type="file" accept=".json,application/json" />
+        </label>
+        <button id="openPaste">貼上資料</button>
+        <button id="exportCsv">匯出 CSV</button>
+        <button id="exportJson">匯出 JSON</button>
+        <button id="resetDemo" class="danger">重置範例資料</button>
+      </div>
     </header>
 
-    <nav class="nav" aria-label="頁面導覽">
-      <a href="#charts">折線圖對照</a>
-      <a href="#snapshot">市場快照</a>
-      <a href="#history">歷史對照表</a>
-      <a href="#model">量化模型</a>
-      <a href="#judgement">結構判讀</a>
-      <a href="#risk">觀察重點</a>
-    </nav>
+    <div class="notice">
+      <strong>資料說明：</strong>
+      這份網頁已做成可動態匯入完整歷史資料的架構。你只要把 TWSE / TAIFEX 整理好的歷史 CSV 匯入，
+      圖表、風險分數、空單密度、期貨名目金額、現貨保護比率會自動重算。
+    </div>
 
-    <section class="alert" aria-label="關鍵結論">
-      <div class="alert-main">關鍵結論：目前不是<b>「崩盤已啟動」</b>，而是<b>「現貨強買 + 期貨重避險」</b>的高檔風險累積盤。</div>
-      <div class="chip blue"><div class="name">空單密度</div><div class="num">1,219</div><div class="name">口 / 每千點</div></div>
-      <div class="chip red"><div class="name">相對 2024/08/05</div><div class="num">61.3%</div><div class="name">極端恐慌日</div></div>
-      <div class="chip yellow"><div class="name">相對 2026/03/04</div><div class="num">約 96%</div><div class="name">高檔多殺多</div></div>
+    <section class="panel pad">
+      <div class="controls">
+        <div>
+          <label>起始日期</label>
+          <input id="startDate" type="date" />
+        </div>
+        <div>
+          <label>結束日期</label>
+          <input id="endDate" type="date" />
+        </div>
+        <div>
+          <label>比較基準一</label>
+          <select id="benchmarkA"></select>
+        </div>
+        <div>
+          <label>比較基準二</label>
+          <select id="benchmarkB"></select>
+        </div>
+        <button id="applyFilter" class="primary">套用區間</button>
+        <button id="addRow">新增一日</button>
+      </div>
+
+      <div class="grid grid-4" id="kpiGrid"></div>
     </section>
 
-    <section class="grid" id="charts">
+    <div style="height:16px"></div>
+
+    <section class="grid grid-2">
       <div class="panel">
         <div class="panel-header">
-          <h2 class="panel-title">四大核心折線圖</h2>
-          <div class="panel-kicker">三個時間點：2024/08/05 → 2026/03/04 → 2026/05/07</div>
+          <div class="panel-title">A. 加權指數走勢</div>
+          <div class="panel-note">TAIEX Close</div>
         </div>
-        <div class="panel-body">
-          <div class="charts-2x2">
-            <div class="chart-card">
-              <div class="chart-title">A. 加權指數走勢對照 <small>指數位置</small></div>
-              <div id="chart-index"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">B. 外資淨空單對照 <small>口數</small></div>
-              <div id="chart-short"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">C. 空單密度對照 <small>口 / 每千點</small></div>
-              <div id="chart-density"></div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-title">D. 現貨方向對照 <small>外資 vs 三大法人</small></div>
-              <div class="legend"><span class="cyan">外資現貨</span><span class="yellow">三大法人現貨合計</span></div>
-              <div id="chart-cash"></div>
-            </div>
+        <div class="chart-wrap">
+          <svg id="chartTaiex" class="chart"></svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">B. 外資台指期淨空單</div>
+          <div class="panel-note">Foreign Futures Net OI</div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="chartFut" class="chart"></svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">C. 空單密度</div>
+          <div class="panel-note">|外資淨空單| / 加權指數 × 1000</div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="chartDensity" class="chart"></svg>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">D. 現貨方向對照</div>
+          <div class="panel-note">外資 vs 三大法人合計</div>
+        </div>
+        <div class="chart-wrap">
+          <svg id="chartSpot" class="chart"></svg>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-line" style="background:var(--cyan)"></span>外資現貨</span>
+          <span class="legend-item"><span class="legend-line" style="background:var(--yellow)"></span>三大法人現貨合計</span>
+        </div>
+      </div>
+    </section>
+
+    <div style="height:16px"></div>
+
+    <section class="grid grid-3">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">歷史大跌 vs 現今數據對照</div>
+          <div class="panel-note">自動依選取基準日比較</div>
+        </div>
+        <div class="table-wrap">
+          <table id="compareTable"></table>
+        </div>
+      </div>
+
+      <div class="panel pad">
+        <div class="panel-title" style="margin-bottom:12px">量化模型</div>
+        <div class="model">
+          <div class="formula">
+            <div class="eq">Dₜ = |Fₜ| / Sₜ × 1000</div>
+            <div class="desc">空單密度：衡量每 1,000 點加權指數承受多少外資期貨淨空單。</div>
+          </div>
+          <div class="formula">
+            <div class="eq">Nₜ = |Fₜ| × Sₜ × 200</div>
+            <div class="desc">期貨空單名目金額：以台指期乘數 200 元估算名目曝險。</div>
+          </div>
+          <div class="formula">
+            <div class="eq">Pₜ = 現貨淨買超 / 期貨空單名目金額</div>
+            <div class="desc">現貨保護比率：判斷期貨空單更偏避險或攻擊。</div>
+          </div>
+          <div class="formula">
+            <div class="eq">Risk = 0.35D + 0.25S + 0.20F + 0.20O</div>
+            <div class="desc">綜合風險：空單密度、現貨轉弱、期貨增空、選擇權壓力。</div>
           </div>
         </div>
       </div>
 
-      <aside class="panel" id="snapshot">
-        <div class="panel-header">
-          <h2 class="panel-title">當前市場快照</h2>
-          <div class="panel-kicker">2026/05/07</div>
-        </div>
-        <div class="panel-body">
-          <div class="snapshot-grid">
-            <div class="metric"><div class="name">加權指數</div><div class="value neutral">41,933.78<span class="unit">點</span></div></div>
-            <div class="metric"><div class="name">外資現貨買超</div><div class="value positive">+464.12<span class="unit">億元</span></div></div>
-            <div class="metric"><div class="name">投信現貨買超</div><div class="value positive">+160.62<span class="unit">億元</span></div></div>
-            <div class="metric"><div class="name">三大法人合計現貨</div><div class="value positive">+583.31<span class="unit">億元</span></div></div>
-            <div class="metric"><div class="name">外資台指期淨空單</div><div class="value negative">-51,132<span class="unit">口</span></div></div>
-            <div class="metric"><div class="name">期貨空單名目金額</div><div class="value warning">約 4,288<span class="unit">億元</span></div></div>
-            <div class="metric"><div class="name">近 5 日三大法人現貨合計</div><div class="value positive">+1,473<span class="unit">億元</span></div></div>
-            <div class="metric"><div class="name">現貨保護比率（單日）</div><div class="value info">13.6%</div></div>
-            <div class="metric"><div class="name">現貨保護比率（近 5 日）</div><div class="value info">34.3%</div></div>
-            <div class="metric"><div class="name">歷史對照強度</div><div class="value warning">61.3% / 約 96%</div></div>
+      <div class="panel pad">
+        <div class="panel-title" style="margin-bottom:12px">當前風險判讀</div>
+        <div class="summary-box">
+          <div class="big-conclusion">
+            <div class="head" id="riskLevelTitle">風險等級</div>
+            <div class="body" id="riskConclusion">等待資料計算中。</div>
           </div>
-        </div>
-      </aside>
-    </section>
-
-    <section class="section-grid" id="history">
-      <div class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">歷史大跌 vs 現今風險對照</h2>
-          <div class="panel-kicker">核心差異：現貨方向</div>
-        </div>
-        <div class="panel-body">
-          <table class="compare-table">
-            <thead>
-              <tr>
-                <th>指標</th>
-                <th>2024/08/05<br><span class="negative">恐慌殺盤</span></th>
-                <th>2026/03/04<br><span class="negative">高檔多殺多</span></th>
-                <th class="current">2026/05/07<br><span class="warning">高檔避險多方</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>加權指數</td><td>19,830.88</td><td>32,828.88</td><td class="current warning">41,933.78</td></tr>
-              <tr><td>外資淨空單（口）</td><td class="negative">-39,446</td><td class="negative">-41,633</td><td class="current negative">-51,132</td></tr>
-              <tr><td>空單密度（口/每千點）</td><td class="positive">1,989</td><td class="positive">1,268</td><td class="current warning">1,219</td></tr>
-              <tr><td>外資現貨（億元）</td><td class="negative">-699.6</td><td class="negative">-964.66</td><td class="current positive">+464.12</td></tr>
-              <tr><td>三大法人現貨合計（億元）</td><td class="negative">-1,050.37</td><td class="negative">-1,297.37</td><td class="current positive">+583.31</td></tr>
-              <tr><td>結構定義</td><td><span class="tag">恐慌殺盤</span></td><td><span class="tag">高檔多殺多</span></td><td class="current"><span class="tag warning">高檔避險多方</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">05/07 單日法人概況</h2>
-          <div class="panel-kicker">依截圖整理</div>
-        </div>
-        <div class="panel-body">
-          <table class="mini-table">
-            <thead><tr><th>項目</th><th>外資</th><th>投信</th><th>自營</th><th>合計</th></tr></thead>
-            <tbody>
-              <tr><td>現貨買賣超（億元）</td><td class="positive">+464.12</td><td class="positive">+160.62</td><td class="negative">-41.43</td><td class="positive">+583.31</td></tr>
-              <tr><td>期貨未平倉（口）</td><td class="negative">-51,132</td><td class="positive">+46,177</td><td class="negative">-1,034</td><td class="negative">-5,989</td></tr>
-              <tr><td>期貨增減口數（口）</td><td class="negative">-165</td><td class="positive">+1,079</td><td class="positive">+203</td><td class="positive">+1,117</td></tr>
-              <tr><td>選擇權未平倉（口）</td><td class="negative">-909</td><td class="negative">-496</td><td class="negative">-4,288</td><td class="negative">-5,693</td></tr>
-              <tr><td>選擇權增減口數（口）</td><td class="negative">-443</td><td class="neutral">0</td><td class="positive">+3,442</td><td class="positive">+2,999</td></tr>
-            </tbody>
-          </table>
+          <div class="factor-list" id="riskFactors"></div>
         </div>
       </div>
     </section>
 
-    <section class="panel" id="model" style="margin-top:20px;">
+    <div style="height:16px"></div>
+
+    <section class="panel pad">
+      <div class="split">
+        <div class="state-card good">
+          <h3 class="green">避險型空單：目前較像的條件</h3>
+          <ul>
+            <li>現貨端仍是買超，尤其外資與投信同步支撐。</li>
+            <li>外資台指期空單高，但未見單日攻擊式大幅加空。</li>
+            <li>權值股、ETF、投信買盤仍能支撐指數。</li>
+            <li>判斷核心：期貨空單更像保護現貨部位，而非單純裸空。</li>
+          </ul>
+        </div>
+
+        <div class="state-card bad">
+          <h3 class="red">攻擊型空單：需要警戒的條件</h3>
+          <ul>
+            <li>外資現貨由買超轉為賣超 300–500 億以上。</li>
+            <li>外資期貨空單續留大於 50,000 口，且單日再加空 3,000–5,000 口。</li>
+            <li>台指期開高走低、期現貨逆價差擴大。</li>
+            <li>權值股失去支撐，指數紅但下跌家數增加。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div style="height:16px"></div>
+
+    <section class="panel">
       <div class="panel-header">
-        <h2 class="panel-title">量化模型：避免只看空單總口數</h2>
-        <div class="panel-kicker">重點：口數 → 密度 → 名目金額 → 現貨保護</div>
+        <div class="panel-title">完整資料表：可直接編輯，修改後自動重算</div>
+        <div class="panel-note">欄位可支援完整歷史現貨與期貨資料</div>
       </div>
-      <div class="panel-body">
-        <div class="model-grid">
-          <div class="model-card">
-            <div class="name">空單密度</div>
-            <div class="formula">D = |F| / S × 1000</div>
-            <div class="desc">衡量每 1,000 點加權指數承受多少外資淨空單。</div>
-            <div class="result info">1,219</div>
-          </div>
-          <div class="model-card">
-            <div class="name">名目避險金額</div>
-            <div class="formula">N = |F| × S × 200</div>
-            <div class="desc">以台指期乘數 200 換算空單名目曝險金額。</div>
-            <div class="result warning">約 4,288 億</div>
-          </div>
-          <div class="model-card">
-            <div class="name">現貨保護比率</div>
-            <div class="formula">P = Cash Buy / N</div>
-            <div class="desc">觀察現貨買盤是否抵銷期貨空單風險。</div>
-            <div class="result info">13.6% / 34.3%</div>
-          </div>
-          <div class="model-card">
-            <div class="name">歷史對照比率</div>
-            <div class="formula">R = D_now / D_crash</div>
-            <div class="desc">比較目前空單密度與歷史大跌日的相對強度。</div>
-            <div class="result warning">61.3% / 約 96%</div>
-          </div>
-        </div>
-        <div class="logic-chain">
-          <div class="logic-step"><b>1. 高空單口數</b><span>先確認總量是否偏高。</span></div>
-          <div class="logic-step"><b>2. 轉換空單密度</b><span>用指數水位標準化，避免跨時期失真。</span></div>
-          <div class="logic-step"><b>3. 檢查現貨方向</b><span>現貨買超通常偏避險；現貨賣超才接近攻擊。</span></div>
-          <div class="logic-step"><b>4. 定義盤勢結構</b><span>最後判斷是避險型，還是攻擊型空單。</span></div>
-        </div>
+      <div class="table-wrap" style="max-height:520px">
+        <table id="dataTable"></table>
       </div>
     </section>
 
-    <section class="section-grid" id="judgement">
-      <div class="panel">
-        <div class="panel-header">
-          <h2 class="panel-title">結構判讀</h2>
-          <div class="panel-kicker">避險型 vs 攻擊型</div>
+    <div class="footer">
+      本頁僅供研究與風險判讀參考，不構成投資建議。歷史資料請以 TWSE、TPEx、TAIFEX 官方公告為準。
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="pasteModal">
+    <div class="modal">
+      <div class="panel-header">
+        <div class="panel-title">貼上 CSV / JSON 歷史資料</div>
+        <button id="closePaste">關閉</button>
+      </div>
+      <div class="modal-body">
+        <div class="notice">
+          CSV 欄位建議：
+          <strong>date, taiexClose, spotForeign, spotTrust, spotDealer, futuresForeignOI, futuresTrustOI, futuresDealerOI, futuresForeignDelta, futuresTrustDelta, futuresDealerDelta, optionsForeignOI, optionsTrustOI, optionsDealerOI, optionsForeignDelta, optionsTrustDelta, optionsDealerDelta</strong>
         </div>
-        <div class="panel-body">
-          <div class="judgement">
-            <div class="judge-card green">
-              <h3>避險型空單（目前較像）</h3>
-              <ul>
-                <li>現貨買超。</li>
-                <li>期貨空單高，但單日未見明顯攻擊式加空。</li>
-                <li>權值股與投信形成支撐。</li>
-              </ul>
-              <div class="conclusion-box">結論：高檔強多 + 期貨避險</div>
-            </div>
-            <div class="judge-card red">
-              <h3>攻擊型空單（需警戒）</h3>
-              <ul>
-                <li>外資現貨轉大賣。</li>
-                <li>空單續留 &gt; 50,000 口或再加空 3,000–5,000 口。</li>
-                <li>期現貨逆價差擴大。</li>
-              </ul>
-              <div class="conclusion-box">若同時出現，則大跌警訊升高</div>
-            </div>
+
+        <textarea id="pasteText" class="textarea-import" placeholder="在這裡貼上 CSV 或 JSON..."></textarea>
+
+        <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap">
+          <button id="importPasted" class="primary">匯入貼上資料</button>
+          <button id="loadSchema">顯示 CSV 範本</button>
+        </div>
+
+        <div class="help-grid" style="margin-top:16px">
+          <div>
+            <div class="panel-title" style="margin-bottom:8px">CSV 範例</div>
+            <pre class="code">date,taiexClose,spotForeign,spotTrust,spotDealer,futuresForeignOI,futuresTrustOI,futuresDealerOI,futuresForeignDelta,futuresTrustDelta,futuresDealerDelta,optionsForeignOI,optionsTrustOI,optionsDealerOI,optionsForeignDelta,optionsTrustDelta,optionsDealerDelta
+2026-05-07,41933.78,464.12,160.62,-41.43,-51132,46177,-1034,-165,1079,203,-909,-496,-4288,-443,0,3442</pre>
+          </div>
+
+          <div>
+            <div class="panel-title" style="margin-bottom:8px">JSON 範例</div>
+            <pre class="code">[
+  {
+    "date": "2026-05-07",
+    "taiexClose": 41933.78,
+    "spotForeign": 464.12,
+    "spotTrust": 160.62,
+    "spotDealer": -41.43,
+    "futuresForeignOI": -51132,
+    "futuresTrustOI": 46177,
+    "futuresDealerOI": -1034,
+    "futuresForeignDelta": -165,
+    "futuresTrustDelta": 1079,
+    "futuresDealerDelta": 203
+  }
+]</pre>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="panel" id="risk">
-        <div class="panel-header">
-          <h2 class="panel-title">一眼看懂的觀察重點</h2>
-          <div class="panel-kicker">風險監控清單</div>
-        </div>
-        <div class="panel-body">
-          <div class="risk-area">
-            <div class="gauge-wrap">
-              <svg viewBox="0 0 260 150" aria-label="風險儀表">
-                <path d="M35 125 A95 95 0 0 1 82 43" fill="none" stroke="#22c55e" stroke-width="24" stroke-linecap="round"/>
-                <path d="M86 40 A95 95 0 0 1 130 30" fill="none" stroke="#facc15" stroke-width="24" stroke-linecap="round"/>
-                <path d="M135 31 A95 95 0 0 1 185 58" fill="none" stroke="#fb923c" stroke-width="24" stroke-linecap="round"/>
-                <path d="M188 61 A95 95 0 0 1 225 125" fill="none" stroke="#ef4444" stroke-width="24" stroke-linecap="round"/>
-                <line x1="130" y1="125" x2="186" y2="58" stroke="#e7edf7" stroke-width="8" stroke-linecap="round"/>
-                <circle cx="130" cy="125" r="10" fill="#e7edf7"/>
-                <text x="38" y="142" fill="#95a3b8" font-size="12">低</text>
-                <text x="110" y="38" fill="#95a3b8" font-size="12">中</text>
-                <text x="168" y="48" fill="#95a3b8" font-size="12">中高</text>
-                <text x="213" y="142" fill="#95a3b8" font-size="12">高</text>
-              </svg>
-              <div class="gauge-label">中高風險</div>
-              <div class="gauge-sub">風險快速累積中</div>
-            </div>
-            <div class="checklist">
-              <h3>接下來要盯</h3>
-              <ul>
-                <li><span class="boxmark">✓</span><span>外資現貨是否由買超轉賣超 <span class="em">300–500 億</span></span></li>
-                <li><span class="boxmark">✓</span><span>外資期貨空單是否續留 <span class="em">&gt; 50,000 口</span></span></li>
-                <li><span class="boxmark">✓</span><span>是否出現單日再加空 <span class="em">3,000–5,000 口</span></span></li>
-                <li><span class="boxmark">✓</span><span>台指期是否開高走低、逆價差擴大</span></li>
-                <li><span class="boxmark">✓</span><span>權值股是否失去支撐</span></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<script>
+/* ============================================================
+   台股期現貨風險量化儀表板 V3 Dynamic
+   單檔 HTML / Vanilla JS / SVG charts
+   ============================================================ */
 
-    <footer class="footer">
-      資料整理：依使用者提供之三大法人現貨、期貨、選擇權截圖資料與歷史對照數值彙整｜單位：億元 / 口 / 點｜本頁僅供研究與風險判讀參考，不構成投資建議。
-    </footer>
-  </main>
+const STORAGE_KEY = "taiex_risk_dashboard_v3_data";
 
-  <script>
-    const dates = ["2024/08/05", "2026/03/04", "2026/05/07"];
-    const data = {
-      index: [19830.88, 32828.88, 41933.78],
-      short: [-39446, -41633, -51132],
-      density: [1989, 1268, 1219],
-      foreignCash: [-699.6, -964.66, 464.12],
-      totalCash: [-1050.37, -1297.37, 583.31]
-    };
+const FIELD_META = [
+  ["date", "日期"],
+  ["taiexClose", "加權指數"],
+  ["spotForeign", "外資現貨"],
+  ["spotTrust", "投信現貨"],
+  ["spotDealer", "自營現貨"],
+  ["spotTotal", "三大法人現貨合計"],
+  ["futuresForeignOI", "外資期貨未平倉"],
+  ["futuresTrustOI", "投信期貨未平倉"],
+  ["futuresDealerOI", "自營期貨未平倉"],
+  ["futuresTotalOI", "期貨合計未平倉"],
+  ["futuresForeignDelta", "外資期貨增減"],
+  ["futuresTrustDelta", "投信期貨增減"],
+  ["futuresDealerDelta", "自營期貨增減"],
+  ["futuresTotalDelta", "期貨合計增減"],
+  ["optionsForeignOI", "外資選擇權未平倉"],
+  ["optionsTrustOI", "投信選擇權未平倉"],
+  ["optionsDealerOI", "自營選擇權未平倉"],
+  ["optionsTotalOI", "選擇權合計未平倉"],
+  ["optionsForeignDelta", "外資選擇權增減"],
+  ["optionsTrustDelta", "投信選擇權增減"],
+  ["optionsDealerDelta", "自營選擇權增減"],
+  ["optionsTotalDelta", "選擇權合計增減"],
+  ["shortDensity", "空單密度"],
+  ["futuresNotionalB", "期貨空單名目金額"],
+  ["spotProtection1D", "現貨保護比率"]
+];
 
-    const fmt = new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 2 });
-    const fmt0 = new Intl.NumberFormat("zh-TW", { maximumFractionDigits: 0 });
-    const tooltip = document.getElementById("tooltip");
+const EDITABLE_FIELDS = [
+  "date",
+  "taiexClose",
+  "spotForeign",
+  "spotTrust",
+  "spotDealer",
+  "futuresForeignOI",
+  "futuresTrustOI",
+  "futuresDealerOI",
+  "futuresForeignDelta",
+  "futuresTrustDelta",
+  "futuresDealerDelta",
+  "optionsForeignOI",
+  "optionsTrustOI",
+  "optionsDealerOI",
+  "optionsForeignDelta",
+  "optionsTrustDelta",
+  "optionsDealerDelta"
+];
 
-    function map(value, min, max, start, end) {
-      if (max === min) return (start + end) / 2;
-      return start + (value - min) * (end - start) / (max - min);
+const demoData = [
+  {
+    date: "2024-08-05",
+    taiexClose: 19830.88,
+    spotForeign: -699.60,
+    spotTrust: -47.20,
+    spotDealer: -303.57,
+    futuresForeignOI: -39446,
+    futuresTrustOI: null,
+    futuresDealerOI: null,
+    futuresForeignDelta: null,
+    futuresTrustDelta: null,
+    futuresDealerDelta: null,
+    optionsForeignOI: null,
+    optionsTrustOI: null,
+    optionsDealerOI: null,
+    optionsForeignDelta: null,
+    optionsTrustDelta: null,
+    optionsDealerDelta: null,
+    note: "恐慌殺盤"
+  },
+  {
+    date: "2026-03-04",
+    taiexClose: 32828.88,
+    spotForeign: -964.66,
+    spotTrust: -123.50,
+    spotDealer: -209.21,
+    futuresForeignOI: -41633,
+    futuresTrustOI: null,
+    futuresDealerOI: null,
+    futuresForeignDelta: null,
+    futuresTrustDelta: null,
+    futuresDealerDelta: null,
+    optionsForeignOI: null,
+    optionsTrustOI: null,
+    optionsDealerOI: null,
+    optionsForeignDelta: null,
+    optionsTrustDelta: null,
+    optionsDealerDelta: null,
+    note: "高檔多殺多"
+  },
+  {
+    date: "2026-04-22",
+    taiexClose: 39280,
+    spotForeign: 116.09,
+    spotTrust: 37.13,
+    spotDealer: 7.38,
+    futuresForeignOI: -42555,
+    futuresTrustOI: 41752,
+    futuresDealerOI: -4400,
+    futuresForeignDelta: -1260,
+    futuresTrustDelta: -1153,
+    futuresDealerDelta: 803,
+    optionsForeignOI: -349,
+    optionsTrustOI: -440,
+    optionsDealerOI: -2272,
+    optionsForeignDelta: -1733,
+    optionsTrustDelta: 0,
+    optionsDealerDelta: -3523,
+    note: ""
+  },
+  {
+    date: "2026-04-23",
+    taiexClose: 39540,
+    spotForeign: -27.55,
+    spotTrust: 13.56,
+    spotDealer: -191.90,
+    futuresForeignOI: -44027,
+    futuresTrustOI: 41309,
+    futuresDealerOI: -3118,
+    futuresForeignDelta: -1472,
+    futuresTrustDelta: -443,
+    futuresDealerDelta: 1282,
+    optionsForeignOI: 418,
+    optionsTrustOI: -526,
+    optionsDealerOI: -3142,
+    optionsForeignDelta: 767,
+    optionsTrustDelta: -86,
+    optionsDealerDelta: -870,
+    note: ""
+  },
+  {
+    date: "2026-04-24",
+    taiexClose: 39960,
+    spotForeign: 439.08,
+    spotTrust: 22.17,
+    spotDealer: 88.78,
+    futuresForeignOI: -40633,
+    futuresTrustOI: 41727,
+    futuresDealerOI: -4962,
+    futuresForeignDelta: 3394,
+    futuresTrustDelta: 418,
+    futuresDealerDelta: -1844,
+    optionsForeignOI: 1726,
+    optionsTrustOI: -462,
+    optionsDealerOI: -3662,
+    optionsForeignDelta: 1308,
+    optionsTrustDelta: 64,
+    optionsDealerDelta: -520,
+    note: ""
+  },
+  {
+    date: "2026-04-27",
+    taiexClose: 40150,
+    spotForeign: -511.96,
+    spotTrust: 145.02,
+    spotDealer: -105.43,
+    futuresForeignOI: -44223,
+    futuresTrustOI: 42645,
+    futuresDealerOI: -3792,
+    futuresForeignDelta: -3590,
+    futuresTrustDelta: 918,
+    futuresDealerDelta: 1170,
+    optionsForeignOI: 1171,
+    optionsTrustOI: -464,
+    optionsDealerOI: 2503,
+    optionsForeignDelta: -555,
+    optionsTrustDelta: -2,
+    optionsDealerDelta: 6165,
+    note: ""
+  },
+  {
+    date: "2026-04-28",
+    taiexClose: 40520,
+    spotForeign: -392.98,
+    spotTrust: 56.42,
+    spotDealer: 3.52,
+    futuresForeignOI: -45869,
+    futuresTrustOI: 42573,
+    futuresDealerOI: -2708,
+    futuresForeignDelta: -1646,
+    futuresTrustDelta: -72,
+    futuresDealerDelta: 1084,
+    optionsForeignOI: -24,
+    optionsTrustOI: -464,
+    optionsDealerOI: 5761,
+    optionsForeignDelta: -1195,
+    optionsTrustDelta: 0,
+    optionsDealerDelta: 3258,
+    note: ""
+  },
+  {
+    date: "2026-04-29",
+    taiexClose: 40780,
+    spotForeign: -481.47,
+    spotTrust: 21.28,
+    spotDealer: -15.99,
+    futuresForeignOI: -47074,
+    futuresTrustOI: 42195,
+    futuresDealerOI: -1317,
+    futuresForeignDelta: -1205,
+    futuresTrustDelta: -378,
+    futuresDealerDelta: 1391,
+    optionsForeignOI: -335,
+    optionsTrustOI: -474,
+    optionsDealerOI: -9329,
+    optionsForeignDelta: -311,
+    optionsTrustDelta: -10,
+    optionsDealerDelta: -15090,
+    note: ""
+  },
+  {
+    date: "2026-04-30",
+    taiexClose: 41020,
+    spotForeign: -535.62,
+    spotTrust: 10.83,
+    spotDealer: -7.89,
+    futuresForeignOI: -44044,
+    futuresTrustOI: 42317,
+    futuresDealerOI: -1539,
+    futuresForeignDelta: 3030,
+    futuresTrustDelta: 122,
+    futuresDealerDelta: -222,
+    optionsForeignOI: -449,
+    optionsTrustOI: -474,
+    optionsDealerOI: -6520,
+    optionsForeignDelta: -114,
+    optionsTrustDelta: 0,
+    optionsDealerDelta: 2809,
+    note: ""
+  },
+  {
+    date: "2026-05-04",
+    taiexClose: 41680,
+    spotForeign: 669.76,
+    spotTrust: 20.28,
+    spotDealer: 89.41,
+    futuresForeignOI: -43504,
+    futuresTrustOI: 44106,
+    futuresDealerOI: -1964,
+    futuresForeignDelta: 540,
+    futuresTrustDelta: 1789,
+    futuresDealerDelta: -425,
+    optionsForeignOI: 1367,
+    optionsTrustOI: -474,
+    optionsDealerOI: -4184,
+    optionsForeignDelta: 1816,
+    optionsTrustDelta: 0,
+    optionsDealerDelta: 2336,
+    note: ""
+  },
+  {
+    date: "2026-05-05",
+    taiexClose: 41150,
+    spotForeign: 39.39,
+    spotTrust: 34.11,
+    spotDealer: -100.87,
+    futuresForeignOI: -48687,
+    futuresTrustOI: 44209,
+    futuresDealerOI: -848,
+    futuresForeignDelta: -5183,
+    futuresTrustDelta: 103,
+    futuresDealerDelta: 1116,
+    optionsForeignOI: 230,
+    optionsTrustOI: -588,
+    optionsDealerOI: -6546,
+    optionsForeignDelta: -1137,
+    optionsTrustDelta: -114,
+    optionsDealerDelta: -2362,
+    note: ""
+  },
+  {
+    date: "2026-05-06",
+    taiexClose: 41660,
+    spotForeign: 751.05,
+    spotTrust: 15.21,
+    spotDealer: -96.11,
+    futuresForeignOI: -50967,
+    futuresTrustOI: 45098,
+    futuresDealerOI: -1237,
+    futuresForeignDelta: -2280,
+    futuresTrustDelta: 889,
+    futuresDealerDelta: -389,
+    optionsForeignOI: -466,
+    optionsTrustOI: -496,
+    optionsDealerOI: -7730,
+    optionsForeignDelta: -696,
+    optionsTrustDelta: 92,
+    optionsDealerDelta: -1184,
+    note: ""
+  },
+  {
+    date: "2026-05-07",
+    taiexClose: 41933.78,
+    spotForeign: 464.12,
+    spotTrust: 160.62,
+    spotDealer: -41.43,
+    futuresForeignOI: -51132,
+    futuresTrustOI: 46177,
+    futuresDealerOI: -1034,
+    futuresForeignDelta: -165,
+    futuresTrustDelta: 1079,
+    futuresDealerDelta: 203,
+    optionsForeignOI: -909,
+    optionsTrustOI: -496,
+    optionsDealerOI: -4288,
+    optionsForeignDelta: -443,
+    optionsTrustDelta: 0,
+    optionsDealerDelta: 3442,
+    note: "高檔避險多方"
+  }
+];
+
+let rawData = [];
+let filteredData = [];
+
+const els = {
+  kpiGrid: document.getElementById("kpiGrid"),
+  startDate: document.getElementById("startDate"),
+  endDate: document.getElementById("endDate"),
+  benchmarkA: document.getElementById("benchmarkA"),
+  benchmarkB: document.getElementById("benchmarkB"),
+  compareTable: document.getElementById("compareTable"),
+  dataTable: document.getElementById("dataTable"),
+  riskFactors: document.getElementById("riskFactors"),
+  riskLevelTitle: document.getElementById("riskLevelTitle"),
+  riskConclusion: document.getElementById("riskConclusion"),
+  chartTaiex: document.getElementById("chartTaiex"),
+  chartFut: document.getElementById("chartFut"),
+  chartDensity: document.getElementById("chartDensity"),
+  chartSpot: document.getElementById("chartSpot"),
+  pasteModal: document.getElementById("pasteModal"),
+  pasteText: document.getElementById("pasteText")
+};
+
+function toNumber(v) {
+  if (v === null || v === undefined || v === "") return null;
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  const cleaned = String(v).replace(/,/g, "").trim();
+  if (cleaned === "") return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+}
+
+function fmt(n, digits = 2) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return Number(n).toLocaleString("en-US", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  });
+}
+
+function fmt0(n) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return Math.round(Number(n)).toLocaleString("en-US");
+}
+
+function fmtPct(n, digits = 1) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return `${Number(n).toFixed(digits)}%`;
+}
+
+function colorClass(n, positiveRed = true) {
+  if (n === null || n === undefined || Number.isNaN(n)) return "";
+  if (n > 0) return positiveRed ? "red" : "green";
+  if (n < 0) return positiveRed ? "green" : "red";
+  return "";
+}
+
+function sortByDate(data) {
+  return [...data].sort((a, b) => String(a.date).localeCompare(String(b.date)));
+}
+
+function enrichRows(data) {
+  return sortByDate(data).map((r, idx, arr) => {
+    const row = { ...r };
+
+    for (const f of EDITABLE_FIELDS) {
+      if (f !== "date") row[f] = toNumber(row[f]);
     }
 
-    function niceTicks(min, max, count = 5) {
-      const span = max - min;
-      const raw = span / count;
-      const pow = Math.pow(10, Math.floor(Math.log10(raw)));
-      const mult = raw / pow;
-      const step = (mult <= 1 ? 1 : mult <= 2 ? 2 : mult <= 5 ? 5 : 10) * pow;
-      const niceMin = Math.floor(min / step) * step;
-      const niceMax = Math.ceil(max / step) * step;
-      const ticks = [];
-      for (let v = niceMin; v <= niceMax + step * .5; v += step) ticks.push(v);
-      return ticks;
+    row.spotTotal = sumNullable(row.spotForeign, row.spotTrust, row.spotDealer);
+    row.futuresTotalOI = sumNullable(row.futuresForeignOI, row.futuresTrustOI, row.futuresDealerOI);
+    row.futuresTotalDelta = sumNullable(row.futuresForeignDelta, row.futuresTrustDelta, row.futuresDealerDelta);
+    row.optionsTotalOI = sumNullable(row.optionsForeignOI, row.optionsTrustOI, row.optionsDealerOI);
+    row.optionsTotalDelta = sumNullable(row.optionsForeignDelta, row.optionsTrustDelta, row.optionsDealerDelta);
+
+    row.shortDensity =
+      row.taiexClose && row.futuresForeignOI !== null
+        ? Math.abs(row.futuresForeignOI) / row.taiexClose * 1000
+        : null;
+
+    row.futuresNotionalB =
+      row.taiexClose && row.futuresForeignOI !== null
+        ? Math.abs(row.futuresForeignOI) * row.taiexClose * 200 / 100000000
+        : null;
+
+    row.spotProtection1D =
+      row.futuresNotionalB && row.spotTotal !== null
+        ? row.spotTotal / row.futuresNotionalB * 100
+        : null;
+
+    const last5 = arr
+      .slice(Math.max(0, idx - 4), idx + 1)
+      .map(x => sumNullable(x.spotForeign, x.spotTrust, x.spotDealer))
+      .filter(x => x !== null);
+
+    row.spotTotal5D = last5.length ? last5.reduce((a, b) => a + b, 0) : null;
+    row.spotProtection5D =
+      row.futuresNotionalB && row.spotTotal5D !== null
+        ? row.spotTotal5D / row.futuresNotionalB * 100
+        : null;
+
+    return row;
+  });
+}
+
+function sumNullable(...vals) {
+  const nums = vals.filter(v => v !== null && v !== undefined && !Number.isNaN(Number(v))).map(Number);
+  if (!nums.length) return null;
+  return nums.reduce((a, b) => a + b, 0);
+}
+
+function saveData() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(rawData));
+}
+
+function loadData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    rawData = saved ? JSON.parse(saved) : demoData;
+  } catch {
+    rawData = demoData;
+  }
+  rawData = enrichRows(rawData);
+}
+
+function setupDates() {
+  if (!rawData.length) return;
+
+  const dates = rawData.map(r => r.date).filter(Boolean);
+  els.startDate.value = dates[0];
+  els.endDate.value = dates[dates.length - 1];
+
+  renderBenchmarkOptions();
+}
+
+function renderBenchmarkOptions() {
+  const options = rawData.map(r => {
+    const label = `${r.date}${r.note ? "｜" + r.note : ""}`;
+    return `<option value="${r.date}">${label}</option>`;
+  }).join("");
+
+  els.benchmarkA.innerHTML = options;
+  els.benchmarkB.innerHTML = options;
+
+  if (rawData.find(r => r.date === "2024-08-05")) els.benchmarkA.value = "2024-08-05";
+  if (rawData.find(r => r.date === "2026-03-04")) els.benchmarkB.value = "2026-03-04";
+}
+
+function applyFilter() {
+  const start = els.startDate.value;
+  const end = els.endDate.value;
+
+  filteredData = rawData.filter(r => {
+    if (start && r.date < start) return false;
+    if (end && r.date > end) return false;
+    return true;
+  });
+
+  if (!filteredData.length) filteredData = [...rawData];
+
+  renderAll();
+}
+
+function latestRow() {
+  return filteredData[filteredData.length - 1] || rawData[rawData.length - 1] || null;
+}
+
+function previousRow() {
+  if (filteredData.length >= 2) return filteredData[filteredData.length - 2];
+  return null;
+}
+
+function renderAll() {
+  rawData = enrichRows(rawData);
+  filteredData = enrichRows(filteredData.length ? filteredData : rawData);
+
+  renderKpis();
+  renderCharts();
+  renderCompareTable();
+  renderRisk();
+  renderDataTable();
+  saveData();
+}
+
+function renderKpis() {
+  const r = latestRow();
+  if (!r) {
+    els.kpiGrid.innerHTML = `<div class="empty">沒有資料</div>`;
+    return;
+  }
+
+  const prev = previousRow();
+
+  const taiexDelta = prev && r.taiexClose && prev.taiexClose ? r.taiexClose - prev.taiexClose : null;
+
+  const kpis = [
+    {
+      label: "最新日期",
+      value: r.date,
+      cls: "blue",
+      sub: "目前篩選區間最後一筆資料"
+    },
+    {
+      label: "加權指數",
+      value: `${fmt(r.taiexClose, 2)} 點`,
+      cls: "yellow",
+      sub: taiexDelta === null ? "日變動：—" : `日變動：${taiexDelta >= 0 ? "+" : ""}${fmt(taiexDelta, 2)} 點`
+    },
+    {
+      label: "外資現貨買賣超",
+      value: `${r.spotForeign >= 0 ? "+" : ""}${fmt(r.spotForeign, 2)} 億`,
+      cls: colorClass(r.spotForeign),
+      sub: "上市現貨"
+    },
+    {
+      label: "三大法人現貨合計",
+      value: `${r.spotTotal >= 0 ? "+" : ""}${fmt(r.spotTotal, 2)} 億`,
+      cls: colorClass(r.spotTotal),
+      sub: "外資 + 投信 + 自營"
+    },
+    {
+      label: "外資台指期淨空單",
+      value: `${fmt0(r.futuresForeignOI)} 口`,
+      cls: r.futuresForeignOI < 0 ? "red" : "green",
+      sub: "負值代表淨空單"
+    },
+    {
+      label: "空單密度",
+      value: `${fmt0(r.shortDensity)} 口 / 每千點`,
+      cls: r.shortDensity >= 1268 ? "red" : r.shortDensity >= 1000 ? "yellow" : "green",
+      sub: "標準化後比單看口數更合理"
+    },
+    {
+      label: "期貨空單名目金額",
+      value: `約 ${fmt(r.futuresNotionalB, 0)} 億`,
+      cls: "yellow",
+      sub: "台指期乘數 200 元估算"
+    },
+    {
+      label: "現貨保護比率",
+      value: fmtPct(r.spotProtection1D, 1),
+      cls: r.spotProtection1D >= 0 ? "green" : "red",
+      sub: `近 5 日：${fmtPct(r.spotProtection5D, 1)}`
     }
+  ];
 
-    function showTooltip(evt, html) {
-      tooltip.innerHTML = html;
-      tooltip.style.display = "block";
-      tooltip.style.left = evt.clientX + "px";
-      tooltip.style.top = evt.clientY + "px";
+  els.kpiGrid.innerHTML = kpis.map(k => `
+    <div class="kpi">
+      <div class="label">${k.label}</div>
+      <div class="value ${k.cls}">${k.value}</div>
+      <div class="sub">${k.sub}</div>
+    </div>
+  `).join("");
+}
+
+function renderCharts() {
+  drawLineChart(els.chartTaiex, {
+    data: filteredData,
+    series: [
+      { key: "taiexClose", name: "加權指數", color: "#facc15" }
+    ],
+    yLabel: "點",
+    valueFormatter: v => fmt(v, 2),
+    highlightLast: true,
+    zeroLine: false
+  });
+
+  drawLineChart(els.chartFut, {
+    data: filteredData,
+    series: [
+      { key: "futuresForeignOI", name: "外資期貨未平倉", color: "#ef4444" }
+    ],
+    yLabel: "口",
+    valueFormatter: v => fmt0(v),
+    highlightLast: true,
+    zeroLine: true
+  });
+
+  drawLineChart(els.chartDensity, {
+    data: filteredData,
+    series: [
+      { key: "shortDensity", name: "空單密度", color: "#fb923c" }
+    ],
+    yLabel: "口/千點",
+    valueFormatter: v => fmt0(v),
+    highlightLast: true,
+    zeroLine: false
+  });
+
+  drawLineChart(els.chartSpot, {
+    data: filteredData,
+    series: [
+      { key: "spotForeign", name: "外資現貨", color: "#22d3ee" },
+      { key: "spotTotal", name: "三大法人現貨合計", color: "#facc15" }
+    ],
+    yLabel: "億元",
+    valueFormatter: v => (v >= 0 ? "+" : "") + fmt(v, 2),
+    highlightLast: true,
+    zeroLine: true
+  });
+}
+
+function drawLineChart(svg, options) {
+  const data = options.data || [];
+  const series = options.series || [];
+  const width = svg.clientWidth || 700;
+  const height = svg.clientHeight || 310;
+  const margin = { top: 28, right: 34, bottom: 46, left: 64 };
+  const innerW = width - margin.left - margin.right;
+  const innerH = height - margin.top - margin.bottom;
+
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+
+  if (!data.length) {
+    svg.innerHTML = `<text x="${width/2}" y="${height/2}" fill="#94a3b8" text-anchor="middle">沒有資料</text>`;
+    return;
+  }
+
+  const values = [];
+  for (const s of series) {
+    for (const d of data) {
+      const v = toNumber(d[s.key]);
+      if (v !== null) values.push(v);
     }
-    function hideTooltip() { tooltip.style.display = "none"; }
+  }
 
-    function makeLineChart(containerId, series, options = {}) {
-      const root = document.getElementById(containerId);
-      const W = 560, H = 260;
-      const margin = { top: 18, right: 24, bottom: 44, left: 58 };
-      const plotW = W - margin.left - margin.right;
-      const plotH = H - margin.top - margin.bottom;
-      const allVals = series.flatMap(s => s.values);
-      let min = options.min ?? Math.min(...allVals);
-      let max = options.max ?? Math.max(...allVals);
-      const pad = (max - min) * .14 || 1;
-      min = options.min ?? min - pad;
-      max = options.max ?? max + pad;
-      if (options.includeZero) { min = Math.min(min, 0); max = Math.max(max, 0); }
-      const ticks = options.ticks ?? niceTicks(min, max, 5);
-      min = Math.min(min, ...ticks); max = Math.max(max, ...ticks);
+  if (!values.length) {
+    svg.innerHTML = `<text x="${width/2}" y="${height/2}" fill="#94a3b8" text-anchor="middle">此圖表欄位沒有資料</text>`;
+    return;
+  }
 
-      const x = (i) => margin.left + map(i, 0, dates.length - 1, 0, plotW);
-      const y = (v) => margin.top + plotH - map(v, min, max, 0, plotH);
-      const colorMap = { yellow: "#facc15", red: "#ef4444", green: "#22c55e", cyan: "#2dd4bf", blue: "#38bdf8", orange: "#fb923c" };
+  let minY = Math.min(...values);
+  let maxY = Math.max(...values);
 
-      const tickSvg = ticks.map(t => `
-        <line class="gridline" x1="${margin.left}" y1="${y(t)}" x2="${W - margin.right}" y2="${y(t)}"></line>
-        <text class="ticktext" x="${margin.left - 8}" y="${y(t) + 4}" text-anchor="end">${options.integer ? fmt0.format(t) : fmt.format(t)}</text>
-      `).join("");
-      const dateSvg = dates.map((d, i) => `
-        <text class="ticktext" x="${x(i)}" y="${H - 14}" text-anchor="middle" fill="${i === 2 ? '#facc15' : '#95a3b8'}">${d}</text>
-      `).join("");
-      const zero = options.includeZero ? `<line class="zero-line" x1="${margin.left}" y1="${y(0)}" x2="${W - margin.right}" y2="${y(0)}"></line>` : "";
+  if (options.zeroLine) {
+    minY = Math.min(minY, 0);
+    maxY = Math.max(maxY, 0);
+  }
 
-      const lines = series.map(s => {
-        const pts = s.values.map((v, i) => `${x(i)},${y(v)}`).join(" ");
-        const c = colorMap[s.color] || s.color;
-        const markers = s.values.map((v, i) => {
-          const label = options.formatter ? options.formatter(v) : (options.integer ? fmt0.format(v) : fmt.format(v));
-          const dx = i === 0 ? 8 : i === 2 ? -8 : 0;
-          const anchor = i === 0 ? "start" : i === 2 ? "end" : "middle";
-          const labelY = y(v) + (v < 0 && options.includeZero ? 20 : -12);
-          const tooltipText = `${dates[i]}<br>${s.name}：${label}${options.unit ? ' ' + options.unit : ''}`;
-          return `
-            <circle class="marker point" data-tip="${tooltipText}" cx="${x(i)}" cy="${y(v)}" r="7" fill="${c}"></circle>
-            <text class="value-label" x="${x(i) + dx}" y="${labelY}" text-anchor="${anchor}" fill="${c}">${label}</text>
+  const pad = (maxY - minY) * 0.12 || Math.abs(maxY || 1) * 0.15 || 1;
+  minY -= pad;
+  maxY += pad;
+
+  const x = i => margin.left + (data.length === 1 ? innerW / 2 : i / (data.length - 1) * innerW);
+  const y = v => margin.top + (maxY - v) / (maxY - minY) * innerH;
+
+  const ticks = 5;
+  let grid = "";
+  for (let i = 0; i <= ticks; i++) {
+    const ty = margin.top + i / ticks * innerH;
+    const val = maxY - i / ticks * (maxY - minY);
+    grid += `
+      <line x1="${margin.left}" y1="${ty}" x2="${margin.left + innerW}" y2="${ty}" stroke="rgba(148,163,184,0.22)" stroke-dasharray="4 4" />
+      <text x="${margin.left - 10}" y="${ty + 4}" fill="#94a3b8" font-size="11" text-anchor="end">${shortNum(val)}</text>
+    `;
+  }
+
+  let zero = "";
+  if (options.zeroLine && minY < 0 && maxY > 0) {
+    const zy = y(0);
+    zero = `<line x1="${margin.left}" y1="${zy}" x2="${margin.left + innerW}" y2="${zy}" stroke="#cbd5e1" stroke-width="1.2" stroke-dasharray="7 5" opacity="0.75" />`;
+  }
+
+  const labelStep = data.length > 12 ? Math.ceil(data.length / 6) : 1;
+  let xLabels = "";
+  data.forEach((d, i) => {
+    if (i % labelStep === 0 || i === data.length - 1) {
+      xLabels += `<text x="${x(i)}" y="${height - 16}" fill="#94a3b8" font-size="11" text-anchor="middle">${formatDateShort(d.date)}</text>`;
+    }
+  });
+
+  let paths = "";
+  let points = "";
+  for (const s of series) {
+    const pts = data.map((d, i) => {
+      const v = toNumber(d[s.key]);
+      if (v === null) return null;
+      return [x(i), y(v), v, d.date];
+    }).filter(Boolean);
+
+    if (pts.length) {
+      const path = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0]} ${p[1]}`).join(" ");
+      paths += `<path d="${path}" fill="none" stroke="${s.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />`;
+
+      pts.forEach((p, idx) => {
+        const isLast = idx === pts.length - 1;
+        const r = isLast && options.highlightLast ? 5.8 : 4.2;
+        points += `
+          <circle cx="${p[0]}" cy="${p[1]}" r="${r}" fill="${s.color}" stroke="#0f172a" stroke-width="2" />
+        `;
+
+        if (isLast || data.length <= 4) {
+          const labelY = p[1] < 38 ? p[1] + 18 : p[1] - 12;
+          points += `
+            <text x="${p[0]}" y="${labelY}" fill="${s.color}" font-size="12" font-weight="800" text-anchor="middle">
+              ${options.valueFormatter ? options.valueFormatter(p[2]) : fmt(p[2], 2)}
+            </text>
           `;
-        }).join("");
-        return `<polyline points="${pts}" fill="none" stroke="${c}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></polyline>${markers}`;
-      }).join("");
-
-      root.innerHTML = `
-        <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${options.title || containerId}">
-          <rect x="0" y="0" width="${W}" height="${H}" rx="12" fill="rgba(2,6,23,.06)"></rect>
-          ${tickSvg}
-          ${zero}
-          <line class="axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${H - margin.bottom}"></line>
-          <line class="axis" x1="${margin.left}" y1="${H - margin.bottom}" x2="${W - margin.right}" y2="${H - margin.bottom}"></line>
-          ${dateSvg}
-          ${lines}
-          ${options.note ? `<foreignObject x="${W - 205}" y="${margin.top + 14}" width="185" height="74"><div xmlns="http://www.w3.org/1999/xhtml" style="border:1px solid rgba(250,204,21,.35);background:rgba(250,204,21,.08);border-radius:10px;padding:8px 10px;color:#facc15;font-weight:900;font-size:13px;line-height:1.45;">${options.note}</div></foreignObject>` : ""}
-        </svg>`;
-      root.querySelectorAll(".point").forEach(p => {
-        p.addEventListener("mousemove", e => showTooltip(e, p.dataset.tip));
-        p.addEventListener("mouseleave", hideTooltip);
+        }
       });
     }
+  }
 
-    makeLineChart("chart-index", [{ name: "加權指數", values: data.index, color: "yellow" }], {
-      min: 15000, max: 46000, integer: false, unit: "點", title: "加權指數走勢對照", note: "目前指數位置最高"
+  svg.innerHTML = `
+    <rect x="0" y="0" width="${width}" height="${height}" fill="transparent" />
+    ${grid}
+    ${zero}
+    <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + innerH}" stroke="rgba(148,163,184,0.45)" />
+    <line x1="${margin.left}" y1="${margin.top + innerH}" x2="${margin.left + innerW}" y2="${margin.top + innerH}" stroke="rgba(148,163,184,0.45)" />
+    <text x="${18}" y="${26}" fill="#94a3b8" font-size="12">${options.yLabel || ""}</text>
+    ${xLabels}
+    ${paths}
+    ${points}
+  `;
+}
+
+function shortNum(v) {
+  if (Math.abs(v) >= 1000000) return (v / 1000000).toFixed(1) + "M";
+  if (Math.abs(v) >= 10000) return (v / 1000).toFixed(0) + "k";
+  if (Math.abs(v) >= 1000) return fmt0(v);
+  return Number(v).toFixed(0);
+}
+
+function formatDateShort(date) {
+  if (!date) return "";
+  const parts = String(date).split("-");
+  if (parts.length === 3) return `${parts[1]}/${parts[2]}`;
+  return date;
+}
+
+function getRowByDate(date) {
+  return rawData.find(r => r.date === date) || null;
+}
+
+function renderCompareTable() {
+  const current = latestRow();
+  const a = getRowByDate(els.benchmarkA.value);
+  const b = getRowByDate(els.benchmarkB.value);
+  const rows = [a, b, current].filter(Boolean);
+
+  if (!current || rows.length < 1) {
+    els.compareTable.innerHTML = `<tr><td class="empty">沒有比較資料</td></tr>`;
+    return;
+  }
+
+  const heads = rows.map(r => `
+    <th>
+      ${r.date}
+      <div style="font-size:11px;color:#94a3b8;font-weight:500">${r.note || ""}</div>
+    </th>
+  `).join("");
+
+  const relativeA = a && a.shortDensity ? current.shortDensity / a.shortDensity * 100 : null;
+  const relativeB = b && b.shortDensity ? current.shortDensity / b.shortDensity * 100 : null;
+
+  const tr = (name, getter, formatter, classGetter = () => "") => `
+    <tr>
+      <td>${name}</td>
+      ${rows.map(r => `<td class="${classGetter(getter(r), r)}">${formatter(getter(r), r)}</td>`).join("")}
+    </tr>
+  `;
+
+  els.compareTable.innerHTML = `
+    <thead>
+      <tr>
+        <th>比較項目</th>
+        ${heads}
+      </tr>
+    </thead>
+    <tbody>
+      ${tr("加權指數", r => r.taiexClose, v => fmt(v, 2))}
+      ${tr("外資期貨淨空單（口）", r => r.futuresForeignOI, v => fmt0(v), v => v < 0 ? "green" : "red")}
+      ${tr("空單密度（口/每千點）", r => r.shortDensity, v => fmt0(v), v => v >= 1268 ? "red" : v >= 1000 ? "yellow" : "green")}
+      ${tr("外資現貨（億元）", r => r.spotForeign, v => (v >= 0 ? "+" : "") + fmt(v, 2), v => colorClass(v))}
+      ${tr("三大法人現貨合計（億元）", r => r.spotTotal, v => (v >= 0 ? "+" : "") + fmt(v, 2), v => colorClass(v))}
+      ${tr("期貨空單名目金額（億元）", r => r.futuresNotionalB, v => fmt(v, 0), () => "yellow")}
+      ${tr("現貨保護比率（單日）", r => r.spotProtection1D, v => fmtPct(v, 1), v => v >= 0 ? "green" : "red")}
+      <tr>
+        <td>現今相對基準空單密度</td>
+        <td class="yellow">${relativeA === null ? "—" : fmtPct(relativeA, 1)}</td>
+        <td class="yellow">${relativeB === null ? "—" : fmtPct(relativeB, 1)}</td>
+        <td class="blue">目前觀察日</td>
+      </tr>
+    </tbody>
+  `;
+}
+
+function computeRisk(row) {
+  if (!row) return null;
+
+  const densityRisk = clamp((row.shortDensity || 0) / 1268 * 100, 0, 140);
+  const spotRisk = row.spotTotal === null ? 50 : row.spotTotal < -500 ? 100 : row.spotTotal < -300 ? 85 : row.spotTotal < 0 ? 65 : row.spotTotal < 300 ? 42 : 25;
+  const futDeltaRisk = row.futuresForeignDelta === null ? 45 : row.futuresForeignDelta < -5000 ? 100 : row.futuresForeignDelta < -3000 ? 88 : row.futuresForeignDelta < -1000 ? 70 : row.futuresForeignDelta < 0 ? 55 : 35;
+  const optRisk = row.optionsTotalOI === null ? 45 : row.optionsTotalOI < -30000 ? 92 : row.optionsTotalOI < -10000 ? 72 : row.optionsTotalOI < 0 ? 58 : 35;
+
+  const score = densityRisk * 0.35 + spotRisk * 0.25 + futDeltaRisk * 0.20 + optRisk * 0.20;
+
+  return {
+    score,
+    densityRisk,
+    spotRisk,
+    futDeltaRisk,
+    optRisk
+  };
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n));
+}
+
+function renderRisk() {
+  const r = latestRow();
+  const risk = computeRisk(r);
+
+  if (!r || !risk) return;
+
+  let level = "";
+  let cls = "";
+  let conclusion = "";
+
+  if (risk.score >= 80) {
+    level = "紅燈：高風險";
+    cls = "red";
+    conclusion = "期現貨結構偏危險，若現貨同步轉賣且期貨加空，容易進入攻擊型空單結構。";
+  } else if (risk.score >= 62) {
+    level = "橘燈：中高風險";
+    cls = "yellow";
+    conclusion = "目前屬於高檔風險快速累積區，尚未等於崩盤啟動，但必須嚴密追蹤現貨是否轉賣。";
+  } else if (risk.score >= 42) {
+    level = "黃燈：中性偏警戒";
+    cls = "yellow";
+    conclusion = "空單或現貨訊號有壓力，但還沒有形成完整下跌觸發條件。";
+  } else {
+    level = "綠燈：風險相對受控";
+    cls = "green";
+    conclusion = "期現貨結構暫時較健康，急跌風險相對較低。";
+  }
+
+  els.riskLevelTitle.innerHTML = `<span class="${cls}">${level}</span>｜綜合分數 ${risk.score.toFixed(1)}`;
+  els.riskConclusion.textContent = conclusion;
+
+  const factors = [
+    ["空單密度風險", risk.densityRisk, "對照 2026/03/04 大跌密度標準化"],
+    ["現貨轉弱風險", risk.spotRisk, "三大法人現貨買賣超"],
+    ["期貨加空風險", risk.futDeltaRisk, "外資期貨單日增減口數"],
+    ["選擇權壓力", risk.optRisk, "選擇權未平倉壓力"]
+  ];
+
+  els.riskFactors.innerHTML = factors.map(([name, score, desc]) => `
+    <div class="factor">
+      <div class="name">
+        <span>${name}</span>
+        <strong>${score.toFixed(1)}</strong>
+      </div>
+      <div class="bar"><span style="width:${clamp(score, 0, 100)}%"></span></div>
+      <div style="font-size:12px;color:var(--muted-2);margin-top:6px">${desc}</div>
+    </div>
+  `).join("");
+}
+
+function renderDataTable() {
+  if (!rawData.length) {
+    els.dataTable.innerHTML = `<tr><td class="empty">沒有資料</td></tr>`;
+    return;
+  }
+
+  const visibleFields = [
+    "date",
+    "taiexClose",
+    "spotForeign",
+    "spotTrust",
+    "spotDealer",
+    "spotTotal",
+    "futuresForeignOI",
+    "futuresTrustOI",
+    "futuresDealerOI",
+    "futuresTotalOI",
+    "futuresForeignDelta",
+    "futuresTrustDelta",
+    "futuresDealerDelta",
+    "futuresTotalDelta",
+    "optionsForeignOI",
+    "optionsTrustOI",
+    "optionsDealerOI",
+    "optionsTotalOI",
+    "shortDensity",
+    "futuresNotionalB",
+    "spotProtection1D"
+  ];
+
+  const labelMap = Object.fromEntries(FIELD_META);
+
+  els.dataTable.innerHTML = `
+    <thead>
+      <tr>
+        ${visibleFields.map(f => `<th>${labelMap[f] || f}</th>`).join("")}
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rawData.map((r, idx) => `
+        <tr data-idx="${idx}">
+          ${visibleFields.map(f => {
+            const editable = EDITABLE_FIELDS.includes(f);
+            const val = r[f];
+            const display = f === "date"
+              ? val
+              : f.includes("Protection")
+                ? fmtPct(val, 1)
+                : f === "shortDensity"
+                  ? fmt0(val)
+                  : f === "futuresNotionalB"
+                    ? fmt(val, 0)
+                    : typeof val === "number"
+                      ? (Number.isInteger(val) ? fmt0(val) : fmt(val, 2))
+                      : (val ?? "—");
+
+            const cls = numericFieldColor(f, val);
+            return `<td class="${cls}" ${editable ? 'contenteditable="true"' : ""} data-field="${f}">${display}</td>`;
+          }).join("")}
+          <td><button class="danger" data-delete="${idx}">刪除</button></td>
+        </tr>
+      `).join("")}
+    </tbody>
+  `;
+}
+
+function numericFieldColor(field, val) {
+  if (val === null || val === undefined || Number.isNaN(Number(val))) return "";
+  if (field.includes("spot")) return colorClass(Number(val));
+  if (field.includes("futuresForeignOI") || field.includes("options")) return Number(val) < 0 ? "green" : "red";
+  if (field === "shortDensity") return Number(val) >= 1268 ? "red" : Number(val) >= 1000 ? "yellow" : "green";
+  if (field === "futuresNotionalB") return "yellow";
+  if (field.includes("Protection")) return Number(val) >= 0 ? "green" : "red";
+  return "";
+}
+
+function parseCSV(text) {
+  const rows = [];
+  const lines = text.trim().split(/\r?\n/).filter(Boolean);
+  if (!lines.length) return rows;
+
+  const headers = splitCSVLine(lines[0]).map(h => h.trim());
+
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => {
+      obj[h] = cols[idx] ?? "";
     });
-    makeLineChart("chart-short", [{ name: "外資淨空單", values: data.short, color: "red" }], {
-      min: -60000, max: 0, integer: true, unit: "口", title: "外資淨空單對照", note: "空單總量<br>創三者最高"
-    });
-    makeLineChart("chart-density", [{ name: "空單密度", values: data.density, color: "red" }], {
-      min: 0, max: 2500, integer: true, unit: "口/每千點", title: "空單密度對照", note: "僅為 2024/08/05 的 61.3%，但與 2026/03/04 接近"
-    });
-    makeLineChart("chart-cash", [
-      { name: "外資現貨", values: data.foreignCash, color: "cyan" },
-      { name: "三大法人現貨合計", values: data.totalCash, color: "yellow" }
-    ], {
-      min: -1600, max: 900, includeZero: true, integer: false, unit: "億元", title: "現貨方向對照", note: "結構差異關鍵：<br>現貨由賣轉買"
-    });
-  </script>
+    rows.push(normalizeRow(obj));
+  }
+  return rows;
+}
+
+function splitCSVLine(line) {
+  const out = [];
+  let cur = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === "," && !inQuotes) {
+      out.push(cur);
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+function normalizeRow(obj) {
+  const row = {};
+  for (const key of Object.keys(obj)) {
+    const k = key.trim();
+    const v = obj[key];
+
+    if (k === "date" || k === "日期") {
+      row.date = normalizeDate(v);
+      continue;
+    }
+
+    const mapped = mapChineseHeader(k);
+    if (mapped) {
+      row[mapped] = toNumber(v);
+    } else {
+      row[k] = k === "date" ? normalizeDate(v) : toNumber(v) ?? v;
+    }
+  }
+
+  if (!row.date) row.date = new Date().toISOString().slice(0, 10);
+
+  return row;
+}
+
+function mapChineseHeader(k) {
+  const map = {
+    "加權指數": "taiexClose",
+    "外資現貨": "spotForeign",
+    "外資買賣超": "spotForeign",
+    "投信現貨": "spotTrust",
+    "投信買賣超": "spotTrust",
+    "自營現貨": "spotDealer",
+    "自營商現貨": "spotDealer",
+    "自營買賣超": "spotDealer",
+    "外資期貨未平倉": "futuresForeignOI",
+    "外資台指期淨空單": "futuresForeignOI",
+    "投信期貨未平倉": "futuresTrustOI",
+    "自營期貨未平倉": "futuresDealerOI",
+    "外資期貨增減": "futuresForeignDelta",
+    "投信期貨增減": "futuresTrustDelta",
+    "自營期貨增減": "futuresDealerDelta",
+    "外資選擇權未平倉": "optionsForeignOI",
+    "投信選擇權未平倉": "optionsTrustOI",
+    "自營選擇權未平倉": "optionsDealerOI",
+    "外資選擇權增減": "optionsForeignDelta",
+    "投信選擇權增減": "optionsTrustDelta",
+    "自營選擇權增減": "optionsDealerDelta"
+  };
+  return map[k] || null;
+}
+
+function normalizeDate(v) {
+  if (!v) return "";
+  const s = String(v).trim().replace(/\//g, "-");
+
+  const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (m) return `${m[1]}-${m[2].padStart(2, "0")}-${m[3].padStart(2, "0")}`;
+
+  const roc = s.match(/^(\d{2,3})-(\d{1,2})-(\d{1,2})$/);
+  if (roc) {
+    const year = Number(roc[1]) + 1911;
+    return `${year}-${roc[2].padStart(2, "0")}-${roc[3].padStart(2, "0")}`;
+  }
+
+  return s;
+}
+
+function importRows(rows, replace = true) {
+  const cleaned = rows
+    .map(normalizeRow)
+    .filter(r => r.date);
+
+  rawData = replace ? cleaned : [...rawData, ...cleaned];
+
+  const byDate = new Map();
+  for (const r of rawData) byDate.set(r.date, r);
+  rawData = enrichRows([...byDate.values()]);
+
+  setupDates();
+  applyFilter();
+}
+
+function downloadText(filename, text, type = "text/plain") {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function toCSV(data) {
+  const fields = EDITABLE_FIELDS;
+  const header = fields.join(",");
+  const lines = data.map(r => fields.map(f => csvCell(r[f] ?? "")).join(","));
+  return [header, ...lines].join("\n");
+}
+
+function csvCell(v) {
+  const s = String(v);
+  if (s.includes(",") || s.includes('"') || s.includes("\n")) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function addEmptyRow() {
+  const last = rawData[rawData.length - 1];
+  const nextDate = last ? addDays(last.date, 1) : new Date().toISOString().slice(0, 10);
+  rawData.push({
+    date: nextDate,
+    taiexClose: last?.taiexClose ?? null,
+    spotForeign: 0,
+    spotTrust: 0,
+    spotDealer: 0,
+    futuresForeignOI: last?.futuresForeignOI ?? 0,
+    futuresTrustOI: last?.futuresTrustOI ?? 0,
+    futuresDealerOI: last?.futuresDealerOI ?? 0,
+    futuresForeignDelta: 0,
+    futuresTrustDelta: 0,
+    futuresDealerDelta: 0,
+    optionsForeignOI: 0,
+    optionsTrustOI: 0,
+    optionsDealerOI: 0,
+    optionsForeignDelta: 0,
+    optionsTrustDelta: 0,
+    optionsDealerDelta: 0
+  });
+  rawData = enrichRows(rawData);
+  setupDates();
+  els.endDate.value = nextDate;
+  applyFilter();
+}
+
+function addDays(date, days) {
+  const d = new Date(date + "T00:00:00");
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function wireEvents() {
+  document.getElementById("applyFilter").addEventListener("click", applyFilter);
+
+  document.getElementById("addRow").addEventListener("click", addEmptyRow);
+
+  document.getElementById("resetDemo").addEventListener("click", () => {
+    if (confirm("確定重置為內建範例資料？目前 localStorage 資料會被覆蓋。")) {
+      rawData = enrichRows(demoData);
+      setupDates();
+      applyFilter();
+    }
+  });
+
+  document.getElementById("exportCsv").addEventListener("click", () => {
+    downloadText("taiex_risk_data.csv", toCSV(rawData), "text/csv;charset=utf-8");
+  });
+
+  document.getElementById("exportJson").addEventListener("click", () => {
+    downloadText("taiex_risk_data.json", JSON.stringify(rawData, null, 2), "application/json;charset=utf-8");
+  });
+
+  document.getElementById("csvFile").addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    importRows(parseCSV(text), true);
+    e.target.value = "";
+  });
+
+  document.getElementById("jsonFile").addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    const rows = JSON.parse(text);
+    importRows(Array.isArray(rows) ? rows : [rows], true);
+    e.target.value = "";
+  });
+
+  document.getElementById("openPaste").addEventListener("click", () => {
+    els.pasteModal.classList.add("active");
+  });
+
+  document.getElementById("closePaste").addEventListener("click", () => {
+    els.pasteModal.classList.remove("active");
+  });
+
+  document.getElementById("importPasted").addEventListener("click", () => {
+    const text = els.pasteText.value.trim();
+    if (!text) return;
+
+    try {
+      let rows;
+      if (text.startsWith("[") || text.startsWith("{")) {
+        const parsed = JSON.parse(text);
+        rows = Array.isArray(parsed) ? parsed : [parsed];
+      } else {
+        rows = parseCSV(text);
+      }
+      importRows(rows, true);
+      els.pasteModal.classList.remove("active");
+    } catch (err) {
+      alert("匯入失敗：" + err.message);
+    }
+  });
+
+  document.getElementById("loadSchema").addEventListener("click", () => {
+    els.pasteText.value =
+`date,taiexClose,spotForeign,spotTrust,spotDealer,futuresForeignOI,futuresTrustOI,futuresDealerOI,futuresForeignDelta,futuresTrustDelta,futuresDealerDelta,optionsForeignOI,optionsTrustOI,optionsDealerOI,optionsForeignDelta,optionsTrustDelta,optionsDealerDelta
+2026-05-07,41933.78,464.12,160.62,-41.43,-51132,46177,-1034,-165,1079,203,-909,-496,-4288,-443,0,3442`;
+  });
+
+  els.dataTable.addEventListener("input", e => {
+    const td = e.target.closest("td[contenteditable='true']");
+    if (!td) return;
+
+    const tr = td.closest("tr");
+    const idx = Number(tr.dataset.idx);
+    const field = td.dataset.field;
+    let value = td.textContent.trim();
+
+    if (field === "date") {
+      rawData[idx][field] = normalizeDate(value);
+    } else {
+      rawData[idx][field] = toNumber(value);
+    }
+
+    rawData = enrichRows(rawData);
+    applyFilter();
+  });
+
+  els.dataTable.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-delete]");
+    if (!btn) return;
+    const idx = Number(btn.dataset.delete);
+
+    if (confirm(`確定刪除第 ${idx + 1} 筆資料？`)) {
+      rawData.splice(idx, 1);
+      rawData = enrichRows(rawData);
+      setupDates();
+      applyFilter();
+    }
+  });
+
+  window.addEventListener("resize", debounce(renderCharts, 160));
+}
+
+function debounce(fn, delay) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), delay);
+  };
+}
+
+function init() {
+  loadData();
+  setupDates();
+  filteredData = [...rawData];
+  wireEvents();
+  renderAll();
+}
+
+init();
+</script>
 </body>
 </html>
